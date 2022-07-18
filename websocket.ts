@@ -3,7 +3,7 @@ import { nanoid } from "nanoid";
 import WebSocket, { WebSocketServer } from "ws";
 
 interface AuthenticateRequest {
-    headers: IncomingHttpHeaders
+    headers: IncomingHttpHeaders;
 }
 
 interface RoomSpec {
@@ -14,25 +14,25 @@ interface RoomSpec {
 }
 
 interface ServerSpec {
-    port: number;
     authenticate: (request?: AuthenticateRequest) => Promise<string|undefined>;
+    port: number;
     rooms: Record<string, RoomSpec>;
 }
 
 interface ClientData {
-    user_id?: string;
     client_id: string;
-    room_type: string;
     room_id: string;
     room_key: string;
+    room_type: string;
+    user_id?: string;
 }
 
 interface Room {
-    state: any;
     clients: WebSocket.WebSocket[];
-    room_id: string;
     local: any;
+    room_id: string;
     set_state: (patch: any) => void;
+    state: any;
 }
 
 interface ExtendedRoom extends Room {
@@ -73,10 +73,10 @@ export function server(spec: ServerSpec) {
         });
         return {
             client_id,
-            user_id,
-            room_type,
             room_id,
-            room_key
+            room_key,
+            room_type,
+            user_id
         };
     }
 
@@ -96,16 +96,16 @@ export function server(spec: ServerSpec) {
             });
         }
         return {
-            state,
-            set_state,
-            room_id,
+            clients,
             local,
-            clients
+            room_id,
+            set_state,
+            state
         };
     }
 
     async function join_room(websocket: WebSocket.WebSocket, client_data: ClientData) {
-        const { client_id, user_id, room_type, room_key } = client_data;
+        const { client_id, room_type, room_key, user_id } = client_data;
         const room_spec = spec.rooms[room_type];
         const room = room_map[room_key];
 
@@ -156,7 +156,7 @@ export function server(spec: ServerSpec) {
             const room_spec = spec.rooms[room_type];
             const room = room_map[room_key] = room_constructor(room_id);
             await room_spec.on_create(room);
-            join_room(websocket, client_data);
+            await join_room(websocket, client_data);
         } catch (error) {
             delete room_map[room_key];
             throw error;

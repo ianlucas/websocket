@@ -28,7 +28,7 @@ server({
                             + ")."
                         )
                     })
-                })
+                });
             },
 
             async on_leave({ client_id, user_id, state, set_state }) {
@@ -42,7 +42,7 @@ server({
                             + ")."
                         )
                     })
-                })
+                });
             },
 
             messages: {
@@ -58,7 +58,7 @@ server({
                                 + value
                             )
                         })
-                    })
+                    });
                 }
             }
         }
