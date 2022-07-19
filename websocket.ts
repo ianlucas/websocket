@@ -14,7 +14,7 @@ interface RoomSpec {
 }
 
 interface ServerSpec {
-    authenticate: (request?: AuthenticateRequest) => Promise<string|undefined>;
+    authenticate?: (request?: AuthenticateRequest) => Promise<string|undefined>;
     port: number;
     rooms: Record<string, RoomSpec>;
 }
@@ -68,6 +68,11 @@ export function server(spec: ServerSpec) {
             );
         }
         const client_id = nanoid();
+        if (!spec.authenticate) {
+            spec.authenticate = async function stub_authenticate() {
+                return undefined;
+            }
+        }
         const user_id = await spec.authenticate({
             headers: request.headers
         });
