@@ -1,4 +1,4 @@
-import { room } from "./websocket_client.js";
+import { client } from "./websocket_client.js";
 
 function push_message(chatbox, data) {
     const element = document.createElement("div");
@@ -19,24 +19,41 @@ function render(state) {
     });
 }
 
-const chat = room(
+const chat = client(
+    "ws://localhost:1333"
+).room(
     "chat",
     "my-chat"
 );
 
 chat.on_state_change(function (state) {
+    console.log(
+        JSON.parse(
+            JSON.stringify(state)
+        )
+    );
     render(state);
 });
 
 /** @type {HTMLFormElement} */
-const form = document.getElementById("form");
+const message_form = document.getElementById("message_form");
+const quiz_form = document.getElementById("quiz_form");
 
-form.addEventListener("submit", function (event) {
+message_form.addEventListener("submit", function (event) {
     event.preventDefault();
-    const message = form.elements.message.value;
+    const message = message_form.elements.message.value;
     if (!message.length) {
         return;
     }
-    form.elements.message.value = "";
+    message_form.elements.message.value = "";
     chat.send("message", message);
 });
+
+quiz_form.addEventListener("submit", function (event) {
+    event.preventDefault();
+    const quiz = quiz_form.elements.quiz.value;
+    if (!quiz.length) {
+        return;
+    }
+    chat.send("quiz", quiz);
+})

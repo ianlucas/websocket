@@ -13,7 +13,8 @@ server({
                     throw "Invalid Room ID!";
                 }
                 return set_state({
-                    messages: []
+                    messages: [],
+                    quiz: null
                 });
             },
 
@@ -59,6 +60,29 @@ server({
                             )
                         })
                     });
+                },
+
+                quiz({ state, set_state, set_timer, user_id, value }) {
+                    try {
+                        if (state.quiz) {
+                            return;
+                        }
+                        const [question, answers_csv] = value.split("?");
+                        const answers = answers_csv.split(",");
+                        set_state({
+                            quiz: {
+                                created_by: user_id,
+                                created: Date.now(),
+                                question: question + "?",
+                                answers
+                            }
+                        });
+                        set_timer("quiz_timeout", function () {
+                            set_state({
+                                quiz: null
+                            });
+                        }, 10000);
+                    } catch (ignore) {}
                 }
             }
         }

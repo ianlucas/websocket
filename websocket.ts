@@ -28,10 +28,12 @@ interface ClientData {
 }
 
 interface Room {
+    clear_timer: (name: string) => void;
     clients: WebSocket.WebSocket[];
     local: any;
     room_id: string;
     set_state: (patch: any) => void;
+    set_timer: (name: string, callback: () => void, ms: number) => void;
     state: any;
 }
 
@@ -89,6 +91,8 @@ export function server(spec: ServerSpec) {
         const state: any = {};
         const local: any = {};
         const clients: WebSocket.WebSocket[] = [];
+        const timers: Record<string, any> = {};
+
         function set_state(patch: any) {
             Object.assign(state, patch);
             clients.forEach(function (client) {
@@ -100,11 +104,22 @@ export function server(spec: ServerSpec) {
                 );
             });
         }
+
+        function set_timer(name: string, callback: () => void, ms: number) {
+            timers[name] = setTimeout(callback, ms);
+        }
+
+        function clear_timer(name: string) {
+            clearTimeout(timers[name]);
+        }
+
         return {
+            clear_timer,
             clients,
             local,
             room_id,
             set_state,
+            set_timer,
             state
         };
     }
