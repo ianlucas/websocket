@@ -135,7 +135,6 @@ export function server(spec: ServerSpec) {
             user_id
         });
 
-        const client_index = room.clients.length;
         room.clients.push(websocket);
 
         websocket.send(
@@ -158,6 +157,9 @@ export function server(spec: ServerSpec) {
         }
 
         function handle_close() {
+            const client_index = room.clients.findIndex(function (value) {
+                return value === websocket;
+            });
             room.clients.splice(client_index, 1);
             room_spec.on_leave({
                 ...room,
